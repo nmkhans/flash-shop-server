@@ -21,7 +21,6 @@ const server = async () => {
         const database = client.db('cars-werehouse');
         const carsCollection = database.collection('cars');
 
-        
     }
 
     finally {
