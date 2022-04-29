@@ -21,6 +21,13 @@ const server = async () => {
         const database = client.db('cars-werehouse');
         const carsCollection = database.collection('cars');
 
+        //? get all cars
+        app.get('/cars', async (req, res) => {
+            const query = {};
+            const cursor = carsCollection.find(query);
+            const cars = await cursor.toArray();
+            res.send(cars);
+        })
     }
 
     finally {
