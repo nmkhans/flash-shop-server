@@ -32,9 +32,24 @@ const server = async () => {
         //? get car by id
         app.get('/cars/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const car = await carsCollection.findOne(query);
             res.send(car);
+        })
+
+        //? update stock of inventory item
+        app.put('/cars/:id', async (req, res) => {
+            const id = req.params.id;
+            const quantity = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    quantity: quantity.quantity,
+                }
+            };
+            const result = await carsCollection.updateOne(filter, updatedDoc, options);
+            res.send(result)
         })
     }
 
