@@ -21,16 +21,16 @@ const server = async () => {
         const database = client.db('cars-werehouse');
         const carsCollection = database.collection('cars');
 
-        //? get all cars
-        app.get('/cars', async (req, res) => {
+        //? get all inventory item
+        app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = carsCollection.find(query);
             const cars = await cursor.toArray();
             res.send(cars);
         })
 
-        //? get car by id
-        app.get('/cars/:id', async (req, res) => {
+        //? get inventory item by id
+        app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const car = await carsCollection.findOne(query);
@@ -38,7 +38,7 @@ const server = async () => {
         })
 
         //? update stock of inventory item
-        app.put('/cars/:id', async (req, res) => {
+        app.put('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const quantity = req.body.quantity;
             const filter = { _id: ObjectId(id) };
@@ -49,6 +49,15 @@ const server = async () => {
                 }
             };
             const result = await carsCollection.updateOne(filter, updatedDoc, options);
+            res.send(result)
+        })
+
+        //? delete an inventory item
+        app.delete('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await carsCollection.deleteOne(query);
+            console.log(result)
             res.send(result)
         })
     }
