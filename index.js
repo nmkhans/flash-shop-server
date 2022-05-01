@@ -29,6 +29,15 @@ const server = async () => {
             res.send(cars);
         })
 
+        //? get user inventory Item
+        app.get('/useritem', async (req, res) => {
+            const email = req.query.email;
+            const query = {email: email};
+            const cursor = carsCollection.find(query);
+            const cars = await cursor.toArray();
+            res.send(cars);
+        })
+
         //? get inventory item by id
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
@@ -36,6 +45,13 @@ const server = async () => {
             const car = await carsCollection.findOne(query);
             res.send(car);
         })
+
+        //? add inventory item
+        app.post('/inventory', async (req, res) => {
+            const car = req.body;
+            const result = await carsCollection.insertOne(car);
+            res.send(result);
+        });
 
         //? update stock of inventory item
         app.put('/inventory/:id', async (req, res) => {
@@ -57,7 +73,6 @@ const server = async () => {
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
             const result = await carsCollection.deleteOne(query);
-            console.log(result)
             res.send(result)
         })
     }
