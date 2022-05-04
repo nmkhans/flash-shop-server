@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -9,6 +10,20 @@ const port = process.env.PORT || 5000;
 //? middle were
 app.use(cors());
 app.use(express.json());
+const verifyUser = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'Unauthorized Access!' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, (error, decode) => {
+        if (error) {
+            return res.statut(403).send({ message: 'Access Forbidden!' })
+        }
+        req.decode = decode;
+    })
+    next();
+}
 
 //? Database connection
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@flash.f9fim.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -30,9 +45,10 @@ const server = async () => {
         })
 
         //? get user inventory Item
-        app.get('/useritem', async (req, res) => {
+        app.get('/useritem', verifyUser, async (req, res) => {
+            const decodedEmail = req.decode.email;
             const email = req.query.email;
-            const query = {email: email};
+            const query = { email: email };
             const cursor = carsCollection.find(query);
             const cars = await cursor.toArray();
             res.send(cars);
@@ -71,9 +87,19 @@ const server = async () => {
         //? delete an inventory item
         app.delete('/inventory/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const result = await carsCollection.deleteOne(query);
             res.send(result)
+        })
+
+        //? Authentication
+        app.post('/auth', async (req, res) => {
+            const user = req.body;
+            console.log(user)
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+                expiresIn: '1d'
+            })
+            res.send({ token: token })
         })
     }
 
